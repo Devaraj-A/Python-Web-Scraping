@@ -1,33 +1,37 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+class Webscraper:
+  def __init__(self,url):
+    self.url = url
 
-url='https://www.nfl.com/standings/conference/2021/REG'
+  @property
+  def requests(self):
+    return requests.get(self.url)
 
-page=requests.get(url)
-page
+  @property
+  def scrape(self):
+    website = requests.get(self.url)
+    data = BeautifulSoup(website.text, 'lxml')
+    table = data.find('table',{'id':input('Table id:')})
+    header = []
+    for i in table.find_all('th'):
+      row = i.text
+      header.append(row)
 
-soup=BeautifulSoup(page.text, 'lxml')
-soup
+    df = pd.DataFrame(columns=header)
 
-table=soup.find('table', {'summary':'Standings - Detailed View'})
-table
+    for j in table.find_all('tr')[1:]:    
+      data = j.find_all('td')
+      ap = [k.text for k in data]
+      length = len(df)
+      df.loc[length]=ap
+  
+    return df
 
-table.find_all('th')
+  @requests.setter
+  def results(self,url):
+    self.url = url
 
-headers = []
-for i in table.find_all('th'):
-    titles=i.text.strip()
-    headers.append(titles)
-    
-    df=pd.DataFrame(columns=headers)
-
-for j in table.find_all('tr')[1:]:
-    first_td=j.find_all('td')[0].find('div', class_='d3-o-club-shortname').text.strip()
-    row=j.find_all('td')[1:]
-    rowdata=[tr.text.strip() for tr in row]
-    rowdata.insert(0, first_td)
-    length=len(df)
-    df.loc[length]=rowdata    
-    
-    
+data = Webscraper(input('Enter The Website:'))
+data.scrape

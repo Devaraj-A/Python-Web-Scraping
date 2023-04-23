@@ -1,2 +1,1 @@
 # Python Web Scraping
-Samples
